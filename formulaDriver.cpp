@@ -58,21 +58,24 @@ class Litski {
     void MainMenu();
     
     // Add item
-    void addIngredient();
+    void addIngredient(vector<litskiDetails> formulaHolder);
     
     // Remove item
     void removeIngredient();
     
     // Output Total price
     // include serving and unit price
-    string outputFormula(vector<litskiDetails> formula);
+    string outputFormula(vector<litskiDetails> &formula);
     
     // Calculate LCD on quantity
     // store as new array w/ updated details
     int minPurchase();
     
+    // confirming changes
+    void validateFormula(vector<litskiDetails> formulaHolder);
+    
     // Save ingredient list
-    bool saveFormula();
+    bool saveFormula(vector<litskiDetails> formulaAppender);
     
     // load ingredient list
     bool loadFormula(string filename);
@@ -85,8 +88,8 @@ class Litski {
   private:
   
     litskiDetails tokenizeFormula(string input);
-    vector<litskiDetails> formula;
-    int option;
+    vector<litskiDetails> formula, formulaHolder,formulaAppender;
+    int option, counter = 0;
     float size, price, quantity;
     string filename;
  
@@ -112,7 +115,7 @@ void Litski::MainMenu() {
   cin >> option;
   switch (option) {
     case 1: {
-      addIngredient();
+      addIngredient(formulaHolder);
       break;
     }
     case 2: {
@@ -132,37 +135,73 @@ void Litski::MainMenu() {
       break;
     }
     case 6: {
+    
       loadFormula(filename);
       break;
     }
   }
 }
 
-void Litski::addIngredient() {
+void Litski::addIngredient(vector<litskiDetails> formulaHolder) {
   litskiDetails lsd;
   // automatically keep track of index
-  lsd.index = formula.size() + 1;
-  cout << "Fill in the following\nName: ";
+  lsd.index = formulaHolder.size() + 1;
+  cout << "\nFill in the following\nName: ";
     cin >> lsd.name;
   cout << "Purchase Price: ";
     cin >> price;
     lsd.purchasePrice = price;
   cout << "Quantity(grams): ";
     cin >> quantity;
-    lsd.purchaseQuanity = quantity; 
+    lsd.purchaseQuanity = quantity;
+    cin.ignore(256, '\n');
   cout << "Serving Size(grams): ";
     cin >> size;
     lsd.servingSize = size;
   lsd.servingPrice = price / (quantity/size);
-  formula.push_back(lsd);
-  MainMenu();
+  formulaHolder.push_back(lsd);
+  counter += 1;
+  validateFormula(formulaHolder);
 }
+
+void Litski::validateFormula(vector<litskiDetails> formulaHolder) {
+  cout << "\nPlease verify that the following details are correct:" << endl;
+  outputFormula(formulaHolder);
+    cout << std::left << setw(3) << setfill(' ') << "#" << "Options" << endl
+       << std::left << setw(3) << setfill(' ') << "1" << "Confirm" << endl
+       << std::left << setw(3) << setfill(' ') << "2" << "Edit" << endl
+       << std::left << setw(3) << setfill(' ') << "3" << "Add another Ingredient" << endl
+       << std::left << setw(3) << setfill(' ') << "4" << "Main Menu" << endl
+       << "Enter Option: ";
+    cin >> option;
+  if (option == 1) 
+    saveFormula(formulaHolder);
+  else if (option == 2) {
+    // does not reindex curreently
+    if ( formulaHolder.size() == 1)
+      addIngredient(formulaHolder);
+    else {
+      formulaHolder.pop_back();
+      addIngredient(formulaHolder);
+    }
+  }
+  else if (option == 3) 
+    addIngredient(formulaHolder);
+  else if (option == 4)
+    MainMenu();
+}
+
+bool Litski::saveFormula(vector<litskiDetails> formulaHolder) {
+  
+  return false;
+}
+
 
 void Litski::removeIngredient() {
   
 }
 
-string Litski::outputFormula(vector<litskiDetails> formula) {
+string Litski::outputFormula(vector<litskiDetails> &formula) {
   // header
   cout << std::left << setw(3) << setfill(' ') << "#"
       << std::left << setw(15) << setfill(' ')  << "Name"
@@ -171,12 +210,12 @@ string Litski::outputFormula(vector<litskiDetails> formula) {
       << std::left << setw(3) << setfill(' ') << "Q"
       << std::left << setw(3) << setfill(' ') << "$Q"
       << endl;
-  // moves
-  ostringstream outs;
+  // contents
   for (auto i = formula.begin(); i != formula.end(); i++) {
-    outs << *i << endl;
+    cout << *i << endl;
   }
-  return outs.str();
+  cout << endl;
+  return "";
 } 
 
 int Litski::minPurchase() {
