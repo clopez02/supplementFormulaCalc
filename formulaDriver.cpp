@@ -41,11 +41,11 @@ struct litskiDetails {
   // Allows convinient stream output of moves
   friend ostream& operator<< (ostream& outs, const litskiDetails& lsd) {
     outs << std::left << setw(3) << setfill(' ') << lsd.index
-         << std::left << setw(15) << setfill(' ')  << lsd.name
-         << std::left << setw(3) << setfill(' ') << lsd.servingSize
-         << std::left << setw(3) << setfill(' ') << lsd.servingPrice
-         << std::left << setw(3) << setfill(' ') << lsd.purchaseQuanity
-         << std::left << setw(3) << setfill(' ') << lsd.purchasePrice;
+         << std::left << setw(25) << setfill(' ')  << lsd.name
+         << std::left << setw(20) << setfill(' ') << lsd.servingSize
+         << std::left << setw(20) << setfill(' ') << lsd.servingPrice
+         << std::left << setw(20) << setfill(' ') << lsd.purchaseQuanity
+         << std::left << setw(20) << setfill(' ') << lsd.purchasePrice;
     return outs;
   }
 };
@@ -75,7 +75,7 @@ class Litski {
     void validateFormula(vector<litskiDetails> formulaHolder);
     
     // Save ingredient list
-    bool saveFormula(vector<litskiDetails> formulaAppender);
+    bool saveFormula(vector<litskiDetails> formulaAppender, string filename);
     
     // load ingredient list
     bool loadFormula(string filename);
@@ -83,7 +83,7 @@ class Litski {
     // calculate leftover
     int overflowServings();
   
-       
+    void Exit();
        
   private:
   
@@ -97,6 +97,7 @@ class Litski {
 
 int main() {
   Litski L;
+  
   L.loadFormula("formula.txt");
   L.MainMenu();
   
@@ -111,6 +112,7 @@ void Litski::MainMenu() {
        << std::left << setw(3) << setfill(' ') << "4" << "Min Purchase" << endl
        << std::left << setw(3) << setfill(' ') << "5" << "Overflow" << endl
        << std::left << setw(3) << setfill(' ') << "6" << "Load new formula" << endl
+       << std::left << setw(3) << setfill(' ') << "7" << "Exit" << endl
        << "Enter Option: ";
   cin >> option;
   switch (option) {
@@ -123,7 +125,8 @@ void Litski::MainMenu() {
       break;
     }
     case 3: {
-      cout << outputFormula(formula);
+      cout << outputFormula(formula) << endl;
+      MainMenu();
       break;
     }
     case 4: {
@@ -135,8 +138,11 @@ void Litski::MainMenu() {
       break;
     }
     case 6: {
-    
       loadFormula(filename);
+      break;
+    }
+    case 7: {
+      Exit();
       break;
     }
   }
@@ -145,7 +151,8 @@ void Litski::MainMenu() {
 void Litski::addIngredient(vector<litskiDetails> formulaHolder) {
   litskiDetails lsd;
   // automatically keep track of index
-  lsd.index = formulaHolder.size() + 1;
+  counter += 1;
+  lsd.index = formula.size() + counter;
   cout << "\nFill in the following\nName: ";
     cin >> lsd.name;
   cout << "Purchase Price: ";
@@ -160,7 +167,6 @@ void Litski::addIngredient(vector<litskiDetails> formulaHolder) {
     lsd.servingSize = size;
   lsd.servingPrice = price / (quantity/size);
   formulaHolder.push_back(lsd);
-  counter += 1;
   validateFormula(formulaHolder);
 }
 
@@ -174,9 +180,13 @@ void Litski::validateFormula(vector<litskiDetails> formulaHolder) {
        << std::left << setw(3) << setfill(' ') << "4" << "Main Menu" << endl
        << "Enter Option: ";
     cin >> option;
-  if (option == 1) 
-    saveFormula(formulaHolder);
+  if (option == 1) {
+    cout << "Enter filename: ";
+      cin >> filename;
+    saveFormula(formulaHolder, filename);
+  }
   else if (option == 2) {
+    counter--;
     // does not reindex curreently
     if ( formulaHolder.size() == 1)
       addIngredient(formulaHolder);
@@ -191,8 +201,33 @@ void Litski::validateFormula(vector<litskiDetails> formulaHolder) {
     MainMenu();
 }
 
-bool Litski::saveFormula(vector<litskiDetails> formulaHolder) {
-  
+bool Litski::saveFormula(vector<litskiDetails> formulaHolder, string filename) {
+    cout << "\nOpening " << filename <<  " for appending..." << endl;
+    // Declare our Stream and open all at once
+    ofstream fout(filename, std::ios::app);
+    // Output/Append to move.txt
+    if (fout.good()) {
+      for ( unsigned int i = 0; i< formulaHolder.size(); i++)
+      fout << formulaHolder.at(i).index << "," 
+        << formulaHolder.at(i).name << ","
+        << formulaHolder.at(i).servingSize << ","
+        << formulaHolder.at(i).servingPrice<< ","
+        << formulaHolder.at(i).purchaseQuanity << ","
+        << formulaHolder.at(i).purchasePrice
+        << "\n";
+        // Close out Streams
+      fout.close();
+      // clear vectors
+      formulaHolder.clear();
+      formula.clear();
+      loadFormula(filename);
+      cout << endl << "Save was successful\n\n";
+      outputFormula(formula);
+      MainMenu();
+    }  
+    else {
+      cout << "Failed to append\n";
+     }
   return false;
 }
 
@@ -204,11 +239,11 @@ void Litski::removeIngredient() {
 string Litski::outputFormula(vector<litskiDetails> &formula) {
   // header
   cout << std::left << setw(3) << setfill(' ') << "#"
-      << std::left << setw(15) << setfill(' ')  << "Name"
-      << std::left << setw(3) << setfill(' ') << "#s"
-      << std::left << setw(3) << setfill(' ') << "$s"
-      << std::left << setw(3) << setfill(' ') << "Q"
-      << std::left << setw(3) << setfill(' ') << "$Q"
+      << std::left << setw(25) << setfill(' ')  << "Name"
+      << std::left << setw(20) << setfill(' ') << "Serving Size(g)"
+      << std::left << setw(20) << setfill(' ') << "Price per Serving"
+      << std::left << setw(20) << setfill(' ') << "Quanity(g)"
+      << std::left << setw(20) << setfill(' ') << "Price per unit"
       << endl;
   // contents
   for (auto i = formula.begin(); i != formula.end(); i++) {
@@ -291,4 +326,10 @@ litskiDetails Litski::tokenizeFormula(string input) {
     ssCRN.str("");
     ssCRN.clear(); 
   return lsd;
+}
+
+void Litski::Exit() {
+  
+  
+  cout << "\nSuccesfully exited program\n";
 }
