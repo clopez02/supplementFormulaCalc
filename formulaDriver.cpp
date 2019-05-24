@@ -69,7 +69,7 @@ class Litski {
     
     // Calculate LCD on quantity
     // store as new array w/ updated details
-    int minPurchase();
+    int makeBatch();
     
     // confirming changes
     void validateFormula(vector<litskiDetails> formulaHolder);
@@ -80,8 +80,11 @@ class Litski {
     // load ingredient list
     bool loadFormula(string filename);
     
-    // calculate leftover
-    int overflowServings();
+    // calculate scoop size
+    float scoopSize();
+    
+    // calculate total price of a batch
+    float batchPrice();
   
     void Exit();
        
@@ -90,7 +93,7 @@ class Litski {
     litskiDetails tokenizeFormula(string input);
     vector<litskiDetails> formula, formulaHolder,formulaAppender;
     int option, counter = 0;
-    float size, price, quantity;
+    float size, price, totalPrice = 0, quantity, totalServingSize = 0, totalServings = 0;
     string filename;
  
   };
@@ -109,8 +112,8 @@ void Litski::MainMenu() {
        << std::left << setw(3) << setfill(' ') << "1" << "Add Ingredient" << endl
        << std::left << setw(3) << setfill(' ') << "2" << "Remove Ingredient" << endl
        << std::left << setw(3) << setfill(' ') << "3" << "Output" << endl
-       << std::left << setw(3) << setfill(' ') << "4" << "Min Purchase" << endl
-       << std::left << setw(3) << setfill(' ') << "5" << "Overflow" << endl
+       << std::left << setw(3) << setfill(' ') << "4" << "Make Batch" << endl
+       << std::left << setw(3) << setfill(' ') << "5" << "Scoop Size" << endl
        << std::left << setw(3) << setfill(' ') << "6" << "Load new formula" << endl
        << std::left << setw(3) << setfill(' ') << "7" << "Exit" << endl
        << "Enter Option: ";
@@ -130,11 +133,11 @@ void Litski::MainMenu() {
       break;
     }
     case 4: {
-      minPurchase();
+      makeBatch();
       break;
     }
     case 5: {
-      cout << overflowServings();
+      cout << scoopSize();
       break;
     }
     case 6: {
@@ -253,11 +256,30 @@ string Litski::outputFormula(vector<litskiDetails> &formula) {
   return "";
 } 
 
-int Litski::minPurchase() {
-  
+int Litski::makeBatch() {
+  cout << "Enter total amount of servings you wish to make: ";
+    cin >> totalServings;
+  cout << endl;
+  cout   << std::left << setw(15) << setfill(' ') << "Grams"
+      << std::left << setw(20) << setfill(' ')<< "Ingredient\n";
+      
+  for (unsigned int i = 0; i < formula.size(); i++) {
+    quantity = formula.at(i).servingSize * totalServings;
+    cout << std::left << setw(10) << setfill(' ')  << quantity
+         << formula.at(i).name << endl;
+  }
+
 }
 
-int Litski::overflowServings() {
+float Litski::scoopSize() {
+  for (unsigned int i = 0; i < formula.size(); i++ ) {
+    totalServingSize += formula.at(i).servingSize;
+  }
+  
+  return totalServingSize;
+}
+
+float Litski::batchPrice() {
   
 }
 
